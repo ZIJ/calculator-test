@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Calculator</title>
+<style>
+  :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+  body { display: grid; place-items: center; min-height: 100vh; margin: 0; background: Canvas; }
+  .calc { width: 300px; padding: 16px; border-radius: 16px; background: color-mix(in srgb, CanvasText 6%, Canvas); }
+  .display { text-align: right; padding: 8px 4px 16px; min-height: 64px; overflow-wrap: anywhere; }
+  .expr { opacity: .6; font-size: 14px; min-height: 18px; }
+  .out { font-size: 32px; font-variant-numeric: tabular-nums; }
+  .out.error { color: #d33; font-size: 18px; }
+  .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  button { font: inherit; font-size: 20px; padding: 14px 0; border: 0; border-radius: 10px; cursor: pointer;
+           background: color-mix(in srgb, CanvasText 10%, Canvas); color: CanvasText; }
+  button:hover { filter: brightness(1.1); }
+  button.op { background: #ff9f0a; color: white; }
+  button.fn { background: color-mix(in srgb, CanvasText 22%, Canvas); }
+  button.wide { grid-column: span 2; }
+</style>
+</head>
+<body>
+<div class="calc">
+  <div class="display">
+    <div class="expr" id="expr"></div>
+    <div class="out" id="out">0</div>
+  </div>
+  <div class="keys" id="keys">
+    <button class="fn" data-k="C">C</button>
+    <button class="fn" data-k="(">(</button>
+    <button class="fn" data-k=")">)</button>
+    <button class="op" data-k="÷">÷</button>
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+    <button class="op" data-k="×">×</button>
+    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+    <button class="op" data-k="−">−</button>
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+    <button class="op" data-k="+">+</button>
+    <button data-k="0">0</button><button data-k=".">.</button>
+    <button class="fn" data-k="⌫">⌫</button>
+    <button class="op" data-k="=">=</button>
+  </div>
+</div>
+<script type="module">
+  import { evaluate, format } from "./calc.js";
+
+  const exprEl = document.getElementById("expr");
+  const outEl = document.getElementById("out");
+  let expr = "";
+  let justEvaluated = false;
+
+  function render(out = expr || "0", error = false) {
+    outEl.textContent = out;
+    outEl.classList.toggle("error", error);
+  }
+
+  function press(k) {
+    if (k === "C") { expr = ""; exprEl.textContent = ""; render(); return; }
+    if (k === "⌫") { expr = expr.slice(0, -1); render(); return; }
+    if (k === "=") {
+      try {
+        const result = format(evaluate(expr));
+        exprEl.textContent = expr + " =";
+        expr = result;
+        justEvaluated = true;
+        render();
+      } catch (e) {
+        render(e.message, true);
+      }
+      return;
+    }
+    // Typing a digit after "=" starts fresh; an operator continues from the result.
+    if (justEvaluated && /[0-9.(]/.test(k)) expr = "";
+    justEvaluated = false;
+    expr += k;
+    render();
+  }
+
+  document.getElementById("keys").addEventListener("click", (e) => {
+    const k = e.target.dataset?.k;
+    if (k) press(k);
+  });
+
+  const keyMap = { "*": "×", "/": "÷", "-": "−", Enter: "=", "=": "=", Backspace: "⌫", Escape: "C", c: "C" };
+  document.addEventListener("keydown", (e) => {
+    const k = keyMap[e.key] ?? (/^[0-9.+()%^]$/.test(e.key) ? e.key : null);
+    if (k) { e.preventDefault(); press(k); }
+  });
+</script>
+</body>
+</html>
