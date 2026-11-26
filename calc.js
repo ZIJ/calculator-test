@@ -1,4 +1,4 @@
-// Expression evaluator: + - * / % ^, parentheses, unary minus, decimals.
+// Expression evaluator: + - * / % ^, √, π, parentheses, unary minus, decimals.
 // Recursive descent; no eval.
 
 export function evaluate(input) {
@@ -13,9 +13,9 @@ export function evaluate(input) {
 
   // expr   := term (('+' | '-') term)*
   // term   := unary (('*' | '/' | '%') unary)*
-  // unary  := '-' unary | power
+  // unary  := ('-' | '+' | '√') unary | power
   // power  := atom ('^' unary)?        (right-associative)
-  // atom   := number | '(' expr ')'
+  // atom   := number | 'π' | '(' expr ')'
   function expr() {
     let v = term();
     while (peek() === "+" || peek() === "-") {
@@ -42,6 +42,12 @@ export function evaluate(input) {
       next();
       return unary();
     }
+    if (peek() === "√") {
+      next();
+      const v = unary();
+      if (v < 0) throw new Error("Square root of negative number");
+      return Math.sqrt(v);
+    }
     return power();
   }
   function power() {
@@ -59,6 +65,7 @@ export function evaluate(input) {
       expect(")");
       return v;
     }
+    if (t === "π") return Math.PI;
     if (typeof t === "number") return t;
     throw new Error(t === undefined ? "Unexpected end of input" : `Unexpected '${t}'`);
   }
@@ -82,7 +89,7 @@ function tokenize(input) {
       if (m === ".") throw new Error("Invalid number");
       tokens.push(parseFloat(m));
       i += m.length;
-    } else if ("+-*/%^()".includes(c)) {
+    } else if ("+-*/%^()√π".includes(c)) {
       tokens.push(c);
       i++;
     } else {
