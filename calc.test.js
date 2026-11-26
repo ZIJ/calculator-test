@@ -29,7 +29,17 @@ test("display symbols", () => {
   assert.equal(calc("8 × 2 ÷ 4 − 1"), "3");
 });
 
+test("square root and pi", () => {
+  assert.equal(calc("√16"), "4");
+  assert.equal(calc("√(9 + 16)"), "5");
+  assert.equal(calc("2 * √9 + 1"), "7");
+  assert.equal(calc("√4 ^ 2"), "4"); // like -2^2: √(4^2)
+  assert.equal(calc("π"), "3.14159265359");
+  assert.equal(calc("2 * π * 0.5"), "3.14159265359");
+});
+
 test("errors", () => {
+  assert.throws(() => calc("√-4"), /Square root of negative/);
   assert.throws(() => calc("1 / 0"), /Division by zero/);
   assert.throws(() => calc("1 +"), /Unexpected end/);
   assert.throws(() => calc("(1 + 2"), /Expected '\)'/);

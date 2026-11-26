@@ -28,6 +28,10 @@
     <div class="out" id="out">0</div>
   </div>
   <div class="keys" id="keys">
+    <button class="fn" data-k="√">√</button>
+    <button class="fn" data-k="π">π</button>
+    <button class="fn" data-k="^">xʸ</button>
+    <button class="fn" data-k="%">%</button>
     <button class="fn" data-k="C">C</button>
     <button class="fn" data-k="(">(</button>
     <button class="fn" data-k=")">)</button>
@@ -72,7 +76,7 @@
       return;
     }
     // Typing a digit after "=" starts fresh; an operator continues from the result.
-    if (justEvaluated && /[0-9.(]/.test(k)) expr = "";
+    if (justEvaluated && /[0-9.(√π]/.test(k)) expr = "";
     justEvaluated = false;
     expr += k;
     render();
@@ -83,7 +87,7 @@
     if (k) press(k);
   });
 
-  const keyMap = { "*": "×", "/": "÷", "-": "−", Enter: "=", "=": "=", Backspace: "⌫", Escape: "C", c: "C" };
+  const keyMap = { "*": "×", "/": "÷", "-": "−", Enter: "=", "=": "=", r: "√", p: "π", Backspace: "⌫", Escape: "C", c: "C" };
   document.addEventListener("keydown", (e) => {
     const k = keyMap[e.key] ?? (/^[0-9.+()%^]$/.test(e.key) ? e.key : null);
     if (k) { e.preventDefault(); press(k); }
